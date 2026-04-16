@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instore Dashboard | Notas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body id="notasPage" class="app-shell">
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-soft">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-3" href="/dashboard.html">
+        <span class="brand-badge">IN</span>
+        <span>Instore Dashboard</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <li class="nav-item"><a class="nav-link" href="/dashboard.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="/equipo.html">Sobre ellas</a></li>
+          <li class="nav-item"><a class="nav-link" href="/semaforo.html">Semaforo</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/notas.html">Notas</a></li>
+          <li class="nav-item ms-lg-3"><span id="navUser" class="navbar-text text-white-50"></span></li>
+          <li class="nav-item"><button class="btn btn-sm btn-light" onclick="logout()">Salir</button></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="content-wrap">
+    <div class="container">
+      <div id="pageError" class="alert alert-danger d-none mb-4"></div>
+
+      <section class="hero-card mb-4">
+        <div class="row g-4 align-items-center">
+          <div class="col-lg-8">
+            <div class="eyebrow text-dark mb-3">
+              <i class="bi bi-journal-text"></i>
+              Seguimiento cualitativo
+            </div>
+            <h1 class="display-6 fw-bold mb-3">Anota avances, incidencias y observaciones del equipo.</h1>
+            <p class="lead section-subtitle mb-0">Esta parte te permite apuntar cosas sobre Alexandra Parra y Eva para tener un seguimiento mas humano y no solo numerico.</p>
+          </div>
+          <div class="col-lg-4">
+            <div class="panel-card h-100">
+              <div class="small text-uppercase fw-semibold muted-text mb-3">Uso recomendado</div>
+              <p class="mb-2">Anota resultados semanales.</p>
+              <p class="mb-2">Apunta incidencias o mejoras.</p>
+              <p class="mb-0">Deja comentarios para la siguiente reunion.</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="row g-4">
+        <div class="col-lg-5">
+          <div class="panel-card h-100">
+            <h2 class="h4 mb-3">Nueva nota</h2>
+            <form id="noteForm">
+              <div class="mb-3">
+                <label for="employeeSelect" class="form-label fw-semibold">Empleada</label>
+                <select id="employeeSelect" class="form-select"></select>
+              </div>
+              <div class="mb-3">
+                <label for="noteText" class="form-label fw-semibold">Observacion</label>
+                <textarea id="noteText" class="form-control" rows="6" placeholder="Escribe aqui el seguimiento..." required></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary-soft w-100">Guardar nota</button>
+            </form>
+          </div>
+        </div>
+        <div class="col-lg-7">
+          <div class="panel-card h-100">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-3">
+              <div>
+                <h2 class="h4 mb-1">Historial de notas</h2>
+                <p class="section-subtitle mb-0">Todo lo que apuntes se queda guardado en el proyecto.</p>
+              </div>
+            </div>
+            <div id="notesList"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/script.js"></script>
+</body>
+</html>

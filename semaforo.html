@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Instore Dashboard | Semaforo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body id="semaforoHomePage" class="app-shell">
+  <nav class="navbar navbar-expand-lg navbar-dark navbar-soft">
+    <div class="container">
+      <a class="navbar-brand d-flex align-items-center gap-3" href="/dashboard.html">
+        <span class="brand-badge">IN</span>
+        <span>Instore Dashboard</span>
+      </a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="mainNav">
+        <ul class="navbar-nav ms-auto align-items-lg-center gap-lg-2">
+          <li class="nav-item"><a class="nav-link" href="/dashboard.html">Inicio</a></li>
+          <li class="nav-item"><a class="nav-link" href="/equipo.html">Sobre ellas</a></li>
+          <li class="nav-item"><a class="nav-link active" href="/semaforo.html">Semaforo</a></li>
+          <li class="nav-item"><a class="nav-link" href="/notas.html">Notas</a></li>
+          <li class="nav-item ms-lg-3"><span id="navUser" class="navbar-text text-white-50"></span></li>
+          <li class="nav-item"><button class="btn btn-sm btn-light" onclick="logout()">Salir</button></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <main class="content-wrap d-flex align-items-center" style="min-height: calc(100vh - 88px);">
+    <div class="container">
+      <div id="pageError" class="alert alert-danger d-none mb-4"></div>
+
+      <section class="hero-card mx-auto text-center" style="max-width: 980px; padding-top: 3rem; padding-bottom: 3rem;">
+        <div class="eyebrow text-dark mb-3">
+          <i class="bi bi-stoplights-fill"></i>
+          Control por semaforo
+        </div>
+        <h1 class="display-4 fw-bold mb-3">Bienvenido a los KPIs</h1>
+        <p class="lead section-subtitle mb-4">Selecciona la seccion que quieres gestionar. Cada pagina tendra sus KPIs, su formulario para anadir nuevos, opciones de editar o eliminar y su tabla final del semaforo.</p>
+        <div class="d-flex flex-wrap justify-content-center gap-3">
+          <a href="/kpis-alex.html" class="btn btn-primary-soft btn-lg">KPIs de Alex</a>
+          <a href="/kpis-eva.html" class="btn btn-primary-soft btn-lg">KPIs de Eva</a>
+          <a href="/kpis-conjuntos.html" class="btn btn-primary-soft btn-lg">KPIs conjuntos</a>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <script src="/script.js"></script>
+</body>
+</html>

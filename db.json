@@ -1,0 +1,36 @@
+{
+  "user": {
+    "email": "alessandra.indacochea@e-com.es",
+    "password": "1234",
+    "name": "Alessandra"
+  },
+  "team": [
+    {
+      "name": "Alexandra Parra",
+      "role": "Especialista de tienda",
+      "focus": "Ventas y conversion",
+      "strengths": "Muy buena atencion al cliente y seguimiento diario."
+    },
+    {
+      "name": "Eva",
+      "role": "Especialista de tienda",
+      "focus": "Visitas y experiencia cliente",
+      "strengths": "Constante, organizada y resolutiva en tareas operativas."
+    }
+  ],
+  "kpis": [],
+  "notes": [
+    {
+      "id": 101,
+      "employee": "Alexandra Parra",
+      "text": "Buen seguimiento de ventas en la ultima semana y actitud muy proactiva.",
+      "createdAt": "2026-04-15T09:00:00.000Z"
+    },
+    {
+      "id": 102,
+      "employee": "Eva",
+      "text": "Necesita empujar un poco mas la conversion, pero mantiene buena atencion al cliente.",
+      "createdAt": "2026-04-15T10:30:00.000Z"
+    }
+  ]
+}
