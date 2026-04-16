@@ -221,20 +221,16 @@ async function initDashboardPage() {
   ]);
 
   renderSummaryCards(kpis);
-  renderTeamHighlights(team, notes);
+  renderDashboardPanels(team, notes, kpis);
   renderDashboardTable(kpis);
   renderChart(kpis);
 }
 
 function renderSummaryCards(kpis) {
   const totalKpis = kpis.length;
-  const greenCount = kpis.reduce((acc, kpi) => {
-    return acc + (getStatus(kpi.alexandra, kpi.target).className === "status-green" ? 1 : 0);
-  }, 0);
-
-  const evaAverage = Math.round(
-    kpis.reduce((acc, kpi) => acc + (kpi.eva / kpi.target) * 100, 0) / totalKpis
-  );
+  const alexKpis = filterKpisByOwner(kpis, "alex").length;
+  const evaKpis = filterKpisByOwner(kpis, "eva").length;
+  const bothKpis = filterKpisByOwner(kpis, "both").length;
 
   const target = document.getElementById("summaryCards");
   target.innerHTML = `
@@ -247,49 +243,71 @@ function renderSummaryCards(kpis) {
     </div>
     <div class="col-md-4">
       <div class="metric-card h-100">
-        <div class="metric-label mb-2">Alexandra en verde</div>
-        <div class="metric-value">${greenCount}</div>
-        <p class="muted-text mb-0 mt-2">KPIs ya cumplidos o superados por Alexandra.</p>
+        <div class="metric-label mb-2">KPIs individuales</div>
+        <div class="metric-value">${alexKpis + evaKpis}</div>
+        <p class="muted-text mb-0 mt-2">Suma de KPIs propios de Alex y Eva dentro del panel.</p>
       </div>
     </div>
     <div class="col-md-4">
       <div class="metric-card h-100">
-        <div class="metric-label mb-2">Media Eva</div>
-        <div class="metric-value">${evaAverage}%</div>
-        <p class="muted-text mb-0 mt-2">Porcentaje medio respecto al objetivo actual.</p>
+        <div class="metric-label mb-2">KPIs conjuntos</div>
+        <div class="metric-value">${bothKpis}</div>
+        <p class="muted-text mb-0 mt-2">Indicadores compartidos que afectan al seguimiento de las dos.</p>
       </div>
     </div>
   `;
 }
 
-function renderTeamHighlights(team, notes) {
-  const target = document.getElementById("teamHighlights");
-  target.innerHTML = team
-    .map((member) => {
-      const memberNotes = notes.filter((note) => note.employee === member.name).slice(0, 1);
-      const latestNote = memberNotes.length ? memberNotes[0].text : "Sin anotaciones todavia.";
+function renderDashboardPanels(team, notes, kpis) {
+  const target = document.getElementById("dashboardPanels");
+  const latestNotes = notes.slice(0, 3);
 
-      return `
-        <div class="col-lg-6">
-          <div class="employee-card">
-            <div class="d-flex align-items-start gap-3">
-              <div class="employee-icon"><i class="bi bi-person-badge"></i></div>
-              <div>
-                <h3 class="h5 mb-1">${member.name}</h3>
-                <p class="muted-text mb-2">${member.role}</p>
-                <p class="mb-2"><strong>Foco:</strong> ${member.focus}</p>
-                <p class="mb-3"><strong>Fortalezas:</strong> ${member.strengths}</p>
-                <div class="note-card p-3">
-                  <div class="small text-uppercase muted-text fw-semibold mb-2">Ultima observacion</div>
-                  <div>${latestNote}</div>
-                </div>
-              </div>
-            </div>
+  target.innerHTML = `
+    <div class="col-lg-6">
+      <div class="panel-card h-100">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="employee-icon"><i class="bi bi-lightning-charge-fill"></i></div>
+          <div>
+            <h3 class="h5 mb-1">Accesos directos</h3>
+            <p class="section-subtitle mb-0">Navegacion rapida a las secciones mas importantes.</p>
           </div>
         </div>
-      `;
-    })
-    .join("");
+        <div class="d-grid gap-3">
+          <a href="/kpis-alex.html" class="btn btn-outline-soft text-start">Entrar en KPIs de Alex</a>
+          <a href="/kpis-eva.html" class="btn btn-outline-soft text-start">Entrar en KPIs de Eva</a>
+          <a href="/kpis-conjuntos.html" class="btn btn-outline-soft text-start">Entrar en KPIs conjuntos</a>
+          <a href="/notas.html" class="btn btn-outline-soft text-start">Abrir notas de seguimiento</a>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6">
+      <div class="panel-card h-100">
+        <div class="d-flex align-items-center gap-3 mb-3">
+          <div class="employee-icon"><i class="bi bi-journal-richtext"></i></div>
+          <div>
+            <h3 class="h5 mb-1">Ultimas observaciones</h3>
+            <p class="section-subtitle mb-0">Resumen reciente del seguimiento cualitativo del equipo.</p>
+          </div>
+        </div>
+        <div class="d-grid gap-3">
+          ${
+            latestNotes.length
+              ? latestNotes
+                  .map(
+                    (note) => `
+                  <div class="note-card">
+                    <div class="small text-uppercase muted-text fw-semibold mb-2">${note.employee}</div>
+                    <div>${note.text}</div>
+                  </div>
+                `
+                  )
+                  .join("")
+              : `<div class="empty-state">Todavia no hay observaciones guardadas.</div>`
+          }
+        </div>
+      </div>
+    </div>
+  `;
 }
 
 function renderDashboardTable(kpis) {
@@ -524,11 +542,79 @@ function renderOwnerKpiTable(kpis, owner, returnPath) {
   }
 }
 
+function getAverageRatio(kpis, personKey) {
+  const validKpis = kpis.filter((kpi) => Number(kpi.target) > 0);
+  if (!validKpis.length) {
+    return 0;
+  }
+
+  const total = validKpis.reduce((acc, kpi) => acc + (Number(kpi[personKey]) / Number(kpi.target)) * 100, 0);
+  return Math.round(total / validKpis.length);
+}
+
+function renderOwnerAverageTable(kpis, owner) {
+  const target = document.getElementById("ownerKpiAverageTable");
+  if (!target) {
+    return;
+  }
+
+  if (!kpis.length) {
+    target.innerHTML = `<tr><td colspan="4" class="text-center muted-text py-4">Todavia no hay datos para calcular la media.</td></tr>`;
+    return;
+  }
+
+  if (owner === "alex") {
+    const average = getAverageRatio(kpis, "alexandra");
+    const status = getStatus(average, 100);
+    target.innerHTML = `
+      <tr>
+        <td>Alex</td>
+        <td>${kpis.length}</td>
+        <td>${average}%</td>
+        <td>${createStatusBadge(status)}</td>
+      </tr>
+    `;
+    return;
+  }
+
+  if (owner === "eva") {
+    const average = getAverageRatio(kpis, "eva");
+    const status = getStatus(average, 100);
+    target.innerHTML = `
+      <tr>
+        <td>Eva</td>
+        <td>${kpis.length}</td>
+        <td>${average}%</td>
+        <td>${createStatusBadge(status)}</td>
+      </tr>
+    `;
+    return;
+  }
+
+  const alexAverage = getAverageRatio(kpis, "alexandra");
+  const evaAverage = getAverageRatio(kpis, "eva");
+  target.innerHTML = `
+    <tr>
+      <td>Alex</td>
+      <td>${kpis.length}</td>
+      <td>${alexAverage}%</td>
+      <td>${createStatusBadge(getStatus(alexAverage, 100))}</td>
+    </tr>
+    <tr>
+      <td>Eva</td>
+      <td>${kpis.length}</td>
+      <td>${evaAverage}%</td>
+      <td>${createStatusBadge(getStatus(evaAverage, 100))}</td>
+    </tr>
+  `;
+}
+
 async function loadOwnerKpiData(owner, returnPath) {
   const allKpis = await fetchJSON("/kpis");
   const kpis = filterKpisByOwner(allKpis, owner);
   renderOwnerKpiCards(kpis, owner, returnPath);
   renderOwnerKpiTable(kpis, owner, returnPath);
+  renderOwnerAverageTable(kpis, owner);
 }
 
 async function initKpiOwnerPage() {
