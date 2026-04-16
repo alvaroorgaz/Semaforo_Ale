@@ -2,6 +2,10 @@ const API = window.location.origin;
 const SESSION_KEY = "instoreDashboardSession";
 const EDIT_KPI_KEY = "instoreDashboardEditKpiId";
 const EDIT_KPI_RETURN_KEY = "instoreDashboardEditKpiReturn";
+const TEAM_PHOTOS = {
+  "Alexandra Parra": "/alexandra.jpg",
+  Eva: "/eva.jpg"
+};
 
 function saveSession(session) {
   localStorage.setItem(SESSION_KEY, JSON.stringify(session));
@@ -69,6 +73,10 @@ function getOwnerLabel(owner) {
   }
 
   return "KPI conjunto";
+}
+
+function getTeamPhoto(name) {
+  return TEAM_PHOTOS[name] || "/instore-logo.svg";
 }
 
 function filterKpisByOwner(kpis, filter) {
@@ -657,7 +665,11 @@ async function initKpiOwnerPage() {
 
 async function deleteKpi(id) {
   await fetchJSON(`/kpis/${id}`, { method: "DELETE" });
-  await loadSemaforoData();
+
+  const ownerPage = document.getElementById("kpiOwnerPage");
+  if (ownerPage) {
+    await loadOwnerKpiData(ownerPage.dataset.owner, window.location.pathname);
+  }
 }
 
 async function initNotasPage() {
@@ -756,7 +768,7 @@ async function initEquipoPage() {
         <div class="col-lg-6">
           <div class="employee-card">
             <div class="d-flex align-items-center gap-3 mb-3">
-              <div class="employee-icon"><i class="bi bi-stars"></i></div>
+              <img src="${getTeamPhoto(member.name)}" alt="${member.name}" class="profile-photo">
               <div>
                 <h2 class="h4 mb-1">${member.name}</h2>
                 <p class="muted-text mb-0">${member.role}</p>
