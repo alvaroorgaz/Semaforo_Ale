@@ -1,4 +1,4 @@
-const API = "http://localhost:3000";
+const API = window.location.origin;
 const SESSION_KEY = "instoreDashboardSession";
 const EDIT_KPI_KEY = "instoreDashboardEditKpiId";
 const EDIT_KPI_RETURN_KEY = "instoreDashboardEditKpiReturn";
