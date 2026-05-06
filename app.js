@@ -2,10 +2,16 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path");
 const cors = require("cors");
+const { createClient } = require("@supabase/supabase-js");
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const DB = path.join(__dirname, "db.json");
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 app.use(cors());
 app.use(express.json());
@@ -15,16 +21,10 @@ function readDB() {
   return JSON.parse(fs.readFileSync(DB, "utf8"));
 }
 
-function writeDB(data) {
-  fs.writeFileSync(DB, JSON.stringify(data, null, 2));
-}
-
 function parseMetricNumber(value) {
   const text = String(value ?? "").trim();
 
-  if (!text) {
-    return NaN;
-  }
+  if (!text) return NaN;
 
   const clean = text
     .replace(/€/g, "")
@@ -50,6 +50,36 @@ function sanitizeKpi(payload) {
     unit: String(payload.unit || "").trim(),
     alexandra: String(payload.alexandra ?? "0").trim(),
     eva: String(payload.eva ?? "0").trim()
+  };
+}
+
+function mapKpiFromSupabase(kpi) {
+  return {
+    id: kpi.id,
+    name: kpi.name,
+    description: kpi.description,
+    formula: kpi.formula,
+    owner: kpi.owner,
+    minTarget: kpi.min_target,
+    target: kpi.target,
+    unit: kpi.unit,
+    alexandra: kpi.alexandra,
+    eva: kpi.eva
+  };
+}
+
+function mapKpiToSupabase(kpi) {
+  return {
+    id: kpi.id,
+    name: kpi.name,
+    description: kpi.description,
+    formula: kpi.formula,
+    owner: kpi.owner,
+    min_target: kpi.minTarget,
+    target: kpi.target,
+    unit: kpi.unit,
+    alexandra: kpi.alexandra,
+    eva: kpi.eva
   };
 }
 
@@ -80,13 +110,20 @@ app.get("/team", (_req, res) => {
   res.json(db.team);
 });
 
-app.get("/kpis", (_req, res) => {
-  const db = readDB();
-  res.json(db.kpis);
+app.get("/kpis", async (_req, res) => {
+  const { data, error } = await supabase
+    .from("kpis")
+    .select("*")
+    .order("id", { ascending: true });
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  res.json(data.map(mapKpiFromSupabase));
 });
 
-app.post("/kpis", (req, res) => {
-  const db = readDB();
+app.post("/kpis", async (req, res) => {
   const newKpi = sanitizeKpi(req.body);
 
   if (
@@ -101,39 +138,38 @@ app.post("/kpis", (req, res) => {
     });
   }
 
-  db.kpis.push(newKpi);
-  writeDB(db);
+  const { error } = await supabase
+    .from("kpis")
+    .insert(mapKpiToSupabase(newKpi));
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
   return res.status(201).json(newKpi);
 });
 
-app.get("/kpis/:id", (req, res) => {
-  const db = readDB();
-  const kpi = db.kpis.find((item) => String(item.id) === String(req.params.id));
+app.get("/kpis/:id", async (req, res) => {
+  const { data, error } = await supabase
+    .from("kpis")
+    .select("*")
+    .eq("id", req.params.id)
+    .single();
 
-  if (!kpi) {
+  if (error || !data) {
     return res.status(404).json({
       ok: false,
       message: "KPI no encontrado"
     });
   }
 
-  return res.json(kpi);
+  return res.json(mapKpiFromSupabase(data));
 });
 
-app.put("/kpis/:id", (req, res) => {
-  const db = readDB();
-  const index = db.kpis.findIndex((item) => String(item.id) === String(req.params.id));
-
-  if (index === -1) {
-    return res.status(404).json({
-      ok: false,
-      message: "KPI no encontrado"
-    });
-  }
-
+app.put("/kpis/:id", async (req, res) => {
   const updatedKpi = sanitizeKpi({
     ...req.body,
-    id: db.kpis[index].id
+    id: req.params.id
   });
 
   if (
@@ -148,25 +184,52 @@ app.put("/kpis/:id", (req, res) => {
     });
   }
 
-  db.kpis[index] = updatedKpi;
-  writeDB(db);
+  const { error } = await supabase
+    .from("kpis")
+    .update(mapKpiToSupabase(updatedKpi))
+    .eq("id", req.params.id);
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
   return res.json(updatedKpi);
 });
 
-app.delete("/kpis/:id", (req, res) => {
-  const db = readDB();
-  db.kpis = db.kpis.filter((kpi) => String(kpi.id) !== String(req.params.id));
-  writeDB(db);
+app.delete("/kpis/:id", async (req, res) => {
+  const { error } = await supabase
+    .from("kpis")
+    .delete()
+    .eq("id", req.params.id);
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
   res.json({ ok: true });
 });
 
-app.get("/notes", (_req, res) => {
-  const db = readDB();
-  res.json(db.notes);
+app.get("/notes", async (_req, res) => {
+  const { data, error } = await supabase
+    .from("notes")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  res.json(
+    data.map((note) => ({
+      id: note.id,
+      employee: note.employee,
+      text: note.text,
+      createdAt: note.created_at
+    }))
+  );
 });
 
-app.post("/notes", (req, res) => {
-  const db = readDB();
+app.post("/notes", async (req, res) => {
   const employee = String(req.body.employee || "").trim();
   const text = String(req.body.text || "").trim();
 
@@ -181,18 +244,33 @@ app.post("/notes", (req, res) => {
     id: Date.now(),
     employee,
     text,
-    createdAt: new Date().toISOString()
+    created_at: new Date().toISOString()
   };
 
-  db.notes.unshift(newNote);
-  writeDB(db);
-  return res.status(201).json(newNote);
+  const { error } = await supabase.from("notes").insert(newNote);
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
+  return res.status(201).json({
+    id: newNote.id,
+    employee,
+    text,
+    createdAt: newNote.created_at
+  });
 });
 
-app.delete("/notes/:id", (req, res) => {
-  const db = readDB();
-  db.notes = db.notes.filter((note) => String(note.id) !== String(req.params.id));
-  writeDB(db);
+app.delete("/notes/:id", async (req, res) => {
+  const { error } = await supabase
+    .from("notes")
+    .delete()
+    .eq("id", req.params.id);
+
+  if (error) {
+    return res.status(500).json({ message: error.message });
+  }
+
   res.json({ ok: true });
 });
 
