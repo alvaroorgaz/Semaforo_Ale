@@ -126,25 +126,14 @@ function formatValue(value, unit) {
     return "-";
   }
 
-  if (/[^0-9.,-]/.test(text)) {
+  if (
+    text.includes(".") ||
+    text.includes("€") ||
+    text.includes("%") ||
+    text.includes("/") ||
+    /[a-zA-Z]/.test(text)
+  ) {
     return text;
-  }
-
-  const numericValue = parseMetricNumber(text);
-  if (Number.isNaN(numericValue)) {
-    return text;
-  }
-
-  if (unit === "EUR") {
-    return new Intl.NumberFormat("es-ES", {
-      style: "currency",
-      currency: "EUR",
-      maximumFractionDigits: 0
-    }).format(numericValue);
-  }
-
-  if (unit === "%") {
-    return `${text}%`;
   }
 
   return `${text} ${unit}`.trim();
