@@ -78,8 +78,12 @@
                   <input id="editKpiUnit" class="form-control" required>
                 </div>
                 <div class="col-12">
-                  <label for="editKpiDescription" class="form-label fw-semibold">Descripcion</label>
+                  <label for="editKpiDescription" class="form-label fw-semibold">Descripcion corta</label>
                   <input id="editKpiDescription" class="form-control">
+                </div>
+                <div class="col-12">
+                  <label for="editKpiFormula" class="form-label fw-semibold">Formula</label>
+                  <input id="editKpiFormula" class="form-control" placeholder="Ej: Leads ÷ clics/visitas × 100">
                 </div>
                 <div class="col-md-4">
                   <label for="editKpiOwner" class="form-label fw-semibold">Este KPI es para</label>
@@ -90,8 +94,12 @@
                   </select>
                 </div>
                 <div class="col-md-4">
+                  <label for="editKpiMinTarget" class="form-label fw-semibold">Objetivo minimo</label>
+                  <input id="editKpiMinTarget" type="text" inputmode="text" class="form-control" placeholder="Ej: 10 / mes, 2.000€, 85%">
+                </div>
+                <div class="col-md-4">
                   <label for="editKpiTarget" class="form-label fw-semibold">Objetivo</label>
-                  <input id="editKpiTarget" type="number" class="form-control" required>
+                  <input id="editKpiTarget" type="text" inputmode="text" class="form-control" placeholder="Ej: 30 / mes, 1.000€, 100.000" required>
                 </div>
                 <div class="col-md-4">
                   <label for="editKpiAlexandra" class="form-label fw-semibold">Valor Alexandra</label>

@@ -19,13 +19,34 @@ function writeDB(data) {
   fs.writeFileSync(DB, JSON.stringify(data, null, 2));
 }
 
+function parseMetricNumber(value) {
+  const text = String(value ?? "").trim();
+
+  if (!text) {
+    return NaN;
+  }
+
+  const clean = text
+    .replace(/€/g, "")
+    .replace(/%/g, "")
+    .replace(/\+/g, "")
+    .replace(/\s/g, "")
+    .replace(/\./g, "")
+    .replace(/,/g, ".");
+
+  const number = Number.parseFloat(clean);
+  return Number.isNaN(number) ? NaN : number;
+}
+
 function sanitizeKpi(payload) {
   return {
     id: payload.id || Date.now(),
     name: String(payload.name || "").trim(),
     description: String(payload.description || "").trim(),
+    formula: String(payload.formula || "").trim(),
     owner: String(payload.owner || "both").trim(),
-    target: Number(payload.target),
+    minTarget: String(payload.minTarget || "").trim(),
+    target: String(payload.target || "").trim(),
     unit: String(payload.unit || "").trim(),
     alexandra: Number(payload.alexandra),
     eva: Number(payload.eva)
@@ -70,7 +91,7 @@ app.post("/kpis", (req, res) => {
 
   if (
     !newKpi.name ||
-    Number.isNaN(newKpi.target) ||
+    Number.isNaN(parseMetricNumber(newKpi.target)) ||
     Number.isNaN(newKpi.alexandra) ||
     Number.isNaN(newKpi.eva)
   ) {
@@ -117,7 +138,7 @@ app.put("/kpis/:id", (req, res) => {
 
   if (
     !updatedKpi.name ||
-    Number.isNaN(updatedKpi.target) ||
+    Number.isNaN(parseMetricNumber(updatedKpi.target)) ||
     Number.isNaN(updatedKpi.alexandra) ||
     Number.isNaN(updatedKpi.eva)
   ) {

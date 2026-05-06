@@ -100,24 +100,60 @@ function updateOwnerFieldState(ownerSelectId, alexandraInputId, evaInputId) {
   }
 }
 
+function parseMetricNumber(value) {
+  const text = String(value ?? "").trim();
+
+  if (!text) {
+    return NaN;
+  }
+
+  const clean = text
+    .replace(/€/g, "")
+    .replace(/%/g, "")
+    .replace(/\+/g, "")
+    .replace(/\s/g, "")
+    .replace(/\./g, "")
+    .replace(/,/g, ".");
+
+  const number = Number.parseFloat(clean);
+  return Number.isNaN(number) ? NaN : number;
+}
+
 function formatValue(value, unit) {
+  const text = String(value ?? "").trim();
+
+  if (!text) {
+    return "-";
+  }
+
+  if (/[^0-9.,-]/.test(text)) {
+    return text;
+  }
+
+  const numericValue = parseMetricNumber(text);
+  if (Number.isNaN(numericValue)) {
+    return text;
+  }
+
   if (unit === "EUR") {
     return new Intl.NumberFormat("es-ES", {
       style: "currency",
       currency: "EUR",
       maximumFractionDigits: 0
-    }).format(value);
+    }).format(numericValue);
   }
 
   if (unit === "%") {
-    return `${value}%`;
+    return `${text}%`;
   }
 
-  return `${new Intl.NumberFormat("es-ES").format(value)} ${unit}`.trim();
+  return `${text} ${unit}`.trim();
 }
 
 function getStatus(value, target) {
-  const ratio = target ? (value / target) * 100 : 0;
+  const targetNumber = parseMetricNumber(target);
+  const valueNumber = parseMetricNumber(value);
+  const ratio = targetNumber ? (valueNumber / targetNumber) * 100 : 0;
 
   if (ratio >= 80 && ratio <= 100) {
     return {
@@ -331,6 +367,8 @@ function renderDashboardTable(kpis) {
             <div class="fw-semibold">${kpi.name}</div>
             <div class="small muted-text">${kpi.description}</div>
           </td>
+          <td>${kpi.formula || "-"}</td>
+          <td>${kpi.minTarget || "-"}</td>
           <td>${formatValue(kpi.target, kpi.unit)}</td>
           <td>
             ${createStatusBadge(alexandraStatus)}
@@ -365,7 +403,7 @@ function renderChart(kpis) {
       datasets: [
         {
           label: "Objetivo",
-          data: kpis.map((kpi) => kpi.target),
+          data: kpis.map((kpi) => parseMetricNumber(kpi.target) || 0),
           backgroundColor: "rgba(16, 37, 66, 0.15)",
           borderRadius: 12
         },
@@ -486,6 +524,8 @@ function renderOwnerKpiCards(kpis, owner, returnPath) {
                 <button class="btn btn-sm btn-outline-danger" onclick="deleteKpi(${kpi.id})">Eliminar</button>
               </div>
             </div>
+            <div class="mb-2"><strong>Formula:</strong> ${kpi.formula || "-"}</div>
+            <div class="mb-2"><strong>Objetivo minimo:</strong> ${kpi.minTarget || "-"}</div>
             <div class="mb-3"><strong>Objetivo:</strong> ${formatValue(kpi.target, kpi.unit)}</div>
             ${valueBlock}
           </div>
@@ -510,6 +550,8 @@ function renderOwnerKpiTable(kpis, owner, returnPath) {
         return `
           <tr>
             <td>${kpi.name}</td>
+            <td>${kpi.formula || "-"}</td>
+            <td>${kpi.minTarget || "-"}</td>
             <td>${formatValue(kpi.target, kpi.unit)}</td>
             <td>${formatValue(kpi.alexandra, kpi.unit)}</td>
             <td>${createStatusBadge(alexandraStatus)}</td>
@@ -522,6 +564,8 @@ function renderOwnerKpiTable(kpis, owner, returnPath) {
         return `
           <tr>
             <td>${kpi.name}</td>
+            <td>${kpi.formula || "-"}</td>
+            <td>${kpi.minTarget || "-"}</td>
             <td>${formatValue(kpi.target, kpi.unit)}</td>
             <td>${formatValue(kpi.eva, kpi.unit)}</td>
             <td>${createStatusBadge(evaStatus)}</td>
@@ -533,6 +577,8 @@ function renderOwnerKpiTable(kpis, owner, returnPath) {
       return `
         <tr>
           <td>${kpi.name}</td>
+          <td>${kpi.formula || "-"}</td>
+          <td>${kpi.minTarget || "-"}</td>
           <td>${formatValue(kpi.target, kpi.unit)}</td>
           <td>${formatValue(kpi.alexandra, kpi.unit)}</td>
           <td>${createStatusBadge(alexandraStatus)}</td>
@@ -545,18 +591,18 @@ function renderOwnerKpiTable(kpis, owner, returnPath) {
     .join("");
 
   if (!kpis.length) {
-    const colspan = owner === "both" ? 7 : 5;
+    const colspan = owner === "both" ? 9 : 7;
     target.innerHTML = `<tr><td colspan="${colspan}" class="text-center muted-text py-4">Todavia no hay KPIs en esta seccion.</td></tr>`;
   }
 }
 
 function getAverageRatio(kpis, personKey) {
-  const validKpis = kpis.filter((kpi) => Number(kpi.target) > 0);
+  const validKpis = kpis.filter((kpi) => parseMetricNumber(kpi.target) > 0);
   if (!validKpis.length) {
     return 0;
   }
 
-  const total = validKpis.reduce((acc, kpi) => acc + (Number(kpi[personKey]) / Number(kpi.target)) * 100, 0);
+  const total = validKpis.reduce((acc, kpi) => acc + (parseMetricNumber(kpi[personKey]) / parseMetricNumber(kpi.target)) * 100, 0);
   return Math.round(total / validKpis.length);
 }
 
@@ -645,8 +691,10 @@ async function initKpiOwnerPage() {
     const payload = {
       name: document.getElementById("ownerKpiName").value.trim(),
       description: document.getElementById("ownerKpiDescription").value.trim(),
+      formula: document.getElementById("ownerKpiFormula").value.trim(),
       owner,
-      target: Number(document.getElementById("ownerKpiTarget").value),
+      minTarget: document.getElementById("ownerKpiMinTarget").value.trim(),
+      target: document.getElementById("ownerKpiTarget").value.trim(),
       unit: document.getElementById("ownerKpiUnit").value.trim(),
       alexandra: owner === "eva" ? 0 : Number(document.getElementById("ownerKpiAlexandra")?.value || 0),
       eva: owner === "alex" ? 0 : Number(document.getElementById("ownerKpiEva")?.value || 0)
@@ -817,6 +865,8 @@ function renderEditKpiSummary(kpi) {
     <h3 class="h5 mb-3">${kpi.name}</h3>
     <p class="mb-2"><strong>Tipo:</strong> ${getOwnerLabel(kpi.owner || "both")}</p>
     <p class="mb-2"><strong>Descripcion:</strong> ${kpi.description || "Sin descripcion"}</p>
+    <p class="mb-2"><strong>Formula:</strong> ${kpi.formula || "-"}</p>
+    <p class="mb-2"><strong>Objetivo minimo:</strong> ${kpi.minTarget || "-"}</p>
     <p class="mb-3"><strong>Objetivo:</strong> ${formatValue(kpi.target, kpi.unit)}</p>
     <div class="mb-3">
       <div class="fw-semibold mb-1">Alexandra</div>
@@ -854,7 +904,9 @@ async function initEditarKpiPage() {
 
   document.getElementById("editKpiName").value = kpi.name;
   document.getElementById("editKpiDescription").value = kpi.description || "";
+  document.getElementById("editKpiFormula").value = kpi.formula || "";
   document.getElementById("editKpiOwner").value = kpi.owner || "both";
+  document.getElementById("editKpiMinTarget").value = kpi.minTarget || "";
   document.getElementById("editKpiTarget").value = kpi.target;
   document.getElementById("editKpiUnit").value = kpi.unit;
   document.getElementById("editKpiAlexandra").value = kpi.alexandra;
@@ -877,8 +929,10 @@ async function initEditarKpiPage() {
       id: Number(kpiId),
       name: document.getElementById("editKpiName").value.trim(),
       description: document.getElementById("editKpiDescription").value.trim(),
+      formula: document.getElementById("editKpiFormula").value.trim(),
       owner: document.getElementById("editKpiOwner").value,
-      target: Number(document.getElementById("editKpiTarget").value),
+      minTarget: document.getElementById("editKpiMinTarget").value.trim(),
+      target: document.getElementById("editKpiTarget").value.trim(),
       unit: document.getElementById("editKpiUnit").value.trim(),
       alexandra: Number(document.getElementById("editKpiAlexandra").value),
       eva: Number(document.getElementById("editKpiEva").value)
