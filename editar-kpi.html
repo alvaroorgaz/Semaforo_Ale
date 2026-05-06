@@ -43,8 +43,11 @@
               Edicion avanzada
             </div>
             <h1 class="display-6 fw-bold mb-3">Editar KPI con una vista mas profesional y clara.</h1>
-            <p class="lead section-subtitle mb-0">Desde aqui puedes cambiar nombre, descripcion, objetivo, unidad y los valores de Alexandra y Eva sin tocar nada a mano en el codigo.</p>
+            <p class="lead section-subtitle mb-0">
+              Desde aqui puedes cambiar nombre, descripcion, objetivo, unidad y los valores de Alexandra y Eva sin tocar nada a mano en el codigo.
+            </p>
           </div>
+
           <div class="col-lg-4">
             <div class="panel-card h-100">
               <div class="small text-uppercase fw-semibold muted-text mb-3">Consejo</div>
@@ -59,72 +62,148 @@
       <section class="row g-4">
         <div class="col-lg-8">
           <div class="panel-card">
+
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-3 mb-4">
               <div>
                 <h2 class="h4 mb-1">Formulario de edicion</h2>
-                <p class="section-subtitle mb-0">Modifica cualquier campo del KPI seleccionado.</p>
+                <p class="section-subtitle mb-0">
+                  Modifica cualquier campo del KPI seleccionado.
+                </p>
               </div>
-              <a href="/semaforo.html" class="btn btn-outline-soft">Volver al semaforo</a>
+
+              <a href="/semaforo.html" class="btn btn-outline-soft">
+                Volver al semaforo
+              </a>
             </div>
 
             <form id="editKpiForm">
+
               <div class="row g-3">
+
                 <div class="col-md-6">
-                  <label for="editKpiName" class="form-label fw-semibold">Nombre del KPI</label>
+                  <label for="editKpiName" class="form-label fw-semibold">
+                    Nombre del KPI
+                  </label>
                   <input id="editKpiName" class="form-control" required>
                 </div>
+
                 <div class="col-md-6">
-                  <label for="editKpiUnit" class="form-label fw-semibold">Unidad</label>
+                  <label for="editKpiUnit" class="form-label fw-semibold">
+                    Unidad
+                  </label>
                   <input id="editKpiUnit" class="form-control" required>
                 </div>
+
                 <div class="col-12">
-                  <label for="editKpiDescription" class="form-label fw-semibold">Descripcion corta</label>
+                  <label for="editKpiDescription" class="form-label fw-semibold">
+                    Descripcion corta
+                  </label>
                   <input id="editKpiDescription" class="form-control">
                 </div>
+
                 <div class="col-12">
-                  <label for="editKpiFormula" class="form-label fw-semibold">Formula</label>
-                  <input id="editKpiFormula" class="form-control" placeholder="Ej: Leads ÷ clics/visitas × 100">
+                  <label for="editKpiFormula" class="form-label fw-semibold">
+                    Formula
+                  </label>
+                  <input id="editKpiFormula" class="form-control">
                 </div>
+
                 <div class="col-md-4">
-                  <label for="editKpiOwner" class="form-label fw-semibold">Este KPI es para</label>
+                  <label for="editKpiOwner" class="form-label fw-semibold">
+                    Este KPI es para
+                  </label>
+
                   <select id="editKpiOwner" class="form-select" required>
                     <option value="alex">Alex</option>
                     <option value="eva">Eva</option>
                     <option value="both">Conjunto</option>
                   </select>
                 </div>
+
                 <div class="col-md-4">
-                  <label for="editKpiMinTarget" class="form-label fw-semibold">Objetivo minimo</label>
-                  <input id="editKpiMinTarget" type="text" inputmode="text" class="form-control" placeholder="Ej: 10 / mes, 2.000€, 85%">
+                  <label for="editKpiMinTarget" class="form-label fw-semibold">
+                    Objetivo minimo
+                  </label>
+
+                  <input
+                    id="editKpiMinTarget"
+                    type="text"
+                    inputmode="text"
+                    class="form-control"
+                  >
                 </div>
+
                 <div class="col-md-4">
-                  <label for="editKpiTarget" class="form-label fw-semibold">Objetivo</label>
-                  <input id="editKpiTarget" type="text" inputmode="text" class="form-control" placeholder="Ej: 30 / mes, 1.000€, 100.000" required>
+                  <label for="editKpiTarget" class="form-label fw-semibold">
+                    Objetivo
+                  </label>
+
+                  <input
+                    id="editKpiTarget"
+                    type="text"
+                    inputmode="text"
+                    class="form-control"
+                    required
+                  >
                 </div>
+
                 <div class="col-md-4">
-                  <label for="editKpiAlexandra" class="form-label fw-semibold">Valor Alexandra</label>
-                  <input id="editKpiAlexandra" type="number" class="form-control" required>
+                  <label for="editKpiAlexandra" class="form-label fw-semibold">
+                    Valor Alexandra
+                  </label>
+
+                  <input
+                    id="editKpiAlexandra"
+                    type="text"
+                    inputmode="text"
+                    class="form-control"
+                    required
+                  >
                 </div>
+
                 <div class="col-md-4">
-                  <label for="editKpiEva" class="form-label fw-semibold">Valor Eva</label>
-                  <input id="editKpiEva" type="number" class="form-control" required>
+                  <label for="editKpiEva" class="form-label fw-semibold">
+                    Valor Eva
+                  </label>
+
+                  <input
+                    id="editKpiEva"
+                    type="text"
+                    inputmode="text"
+                    class="form-control"
+                    required
+                  >
                 </div>
+
               </div>
 
               <div class="d-flex flex-wrap gap-3 mt-4">
-                <button id="saveKpiButton" type="submit" class="btn btn-primary-soft">Guardar cambios</button>
-                <a href="/semaforo.html" class="btn btn-outline-soft">Cancelar</a>
+                <button id="saveKpiButton" type="submit" class="btn btn-primary-soft">
+                  Guardar cambios
+                </button>
+
+                <a href="/semaforo.html" class="btn btn-outline-soft">
+                  Cancelar
+                </a>
               </div>
+
             </form>
+
           </div>
         </div>
 
         <div class="col-lg-4">
           <div class="panel-card h-100">
-            <div class="small text-uppercase fw-semibold muted-text mb-3">Resumen rapido</div>
-            <div id="editKpiSummary" class="empty-state">Cargando datos del KPI...</div>
+            <div class="small text-uppercase fw-semibold muted-text mb-3">
+              Resumen rapido
+            </div>
+
+            <div id="editKpiSummary" class="empty-state">
+              Cargando datos del KPI...
+            </div>
           </div>
         </div>
+
       </section>
     </div>
   </main>

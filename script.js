@@ -696,8 +696,13 @@ async function initKpiOwnerPage() {
       minTarget: document.getElementById("ownerKpiMinTarget").value.trim(),
       target: document.getElementById("ownerKpiTarget").value.trim(),
       unit: document.getElementById("ownerKpiUnit").value.trim(),
-      alexandra: owner === "eva" ? 0 : Number(document.getElementById("ownerKpiAlexandra")?.value || 0),
-      eva: owner === "alex" ? 0 : Number(document.getElementById("ownerKpiEva")?.value || 0)
+      alexandra: owner === "eva"
+      ? "0"
+      : document.getElementById("ownerKpiAlexandra")?.value.trim() || "0",
+
+      eva: owner === "alex"
+      ? "0"
+      : document.getElementById("ownerKpiEva")?.value.trim() || "0"
     };
 
     await fetchJSON("/kpis", {
@@ -934,8 +939,8 @@ async function initEditarKpiPage() {
       minTarget: document.getElementById("editKpiMinTarget").value.trim(),
       target: document.getElementById("editKpiTarget").value.trim(),
       unit: document.getElementById("editKpiUnit").value.trim(),
-      alexandra: Number(document.getElementById("editKpiAlexandra").value),
-      eva: Number(document.getElementById("editKpiEva").value)
+      alexandra: document.getElementById("editKpiAlexandra").value.trim(),
+      eva: document.getElementById("editKpiEva").value.trim()
     };
 
     try {
