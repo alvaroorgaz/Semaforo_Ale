@@ -126,17 +126,7 @@ function formatValue(value, unit) {
     return "-";
   }
 
-  if (
-    text.includes(".") ||
-    text.includes("€") ||
-    text.includes("%") ||
-    text.includes("/") ||
-    /[a-zA-Z]/.test(text)
-  ) {
-    return text;
-  }
-
-  return `${text} ${unit}`.trim();
+  return text;
 }
 
 function getStatus(value, target) {
