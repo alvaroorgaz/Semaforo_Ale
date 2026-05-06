@@ -48,8 +48,8 @@ function sanitizeKpi(payload) {
     minTarget: String(payload.minTarget || "").trim(),
     target: String(payload.target || "").trim(),
     unit: String(payload.unit || "").trim(),
-    alexandra: Number(payload.alexandra),
-    eva: Number(payload.eva)
+    alexandra: String(payload.alexandra ?? "0").trim(),
+    eva: String(payload.eva ?? "0").trim()
   };
 }
 
@@ -92,8 +92,8 @@ app.post("/kpis", (req, res) => {
   if (
     !newKpi.name ||
     Number.isNaN(parseMetricNumber(newKpi.target)) ||
-    Number.isNaN(newKpi.alexandra) ||
-    Number.isNaN(newKpi.eva)
+    Number.isNaN(parseMetricNumber(newKpi.alexandra)) ||
+    Number.isNaN(parseMetricNumber(newKpi.eva))
   ) {
     return res.status(400).json({
       ok: false,
@@ -139,8 +139,8 @@ app.put("/kpis/:id", (req, res) => {
   if (
     !updatedKpi.name ||
     Number.isNaN(parseMetricNumber(updatedKpi.target)) ||
-    Number.isNaN(updatedKpi.alexandra) ||
-    Number.isNaN(updatedKpi.eva)
+    Number.isNaN(parseMetricNumber(updatedKpi.alexandra)) ||
+    Number.isNaN(parseMetricNumber(updatedKpi.eva))
   ) {
     return res.status(400).json({
       ok: false,
