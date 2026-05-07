@@ -24,7 +24,9 @@ function readDB() {
 function parseMetricNumber(value) {
   const text = String(value ?? "").trim();
 
-  if (!text) return NaN;
+  if (!text) {
+    return NaN;
+  }
 
   const clean = text
     .replace(/€/g, "")
@@ -56,21 +58,21 @@ function sanitizeKpi(payload) {
 function mapKpiFromSupabase(kpi) {
   return {
     id: kpi.id,
-    name: kpi.name,
-    description: kpi.description,
-    formula: kpi.formula,
-    owner: kpi.owner,
-    minTarget: kpi.min_target,
-    target: kpi.target,
-    unit: kpi.unit,
-    alexandra: kpi.alexandra,
-    eva: kpi.eva
+    name: kpi.name || "",
+    description: kpi.description || "",
+    formula: kpi.formula || "",
+    owner: kpi.owner || "both",
+    minTarget: kpi.min_target || "",
+    target: kpi.target || "",
+    unit: kpi.unit || "",
+    alexandra: kpi.alexandra || "0",
+    eva: kpi.eva || "0"
   };
 }
 
 function mapKpiToSupabase(kpi) {
   return {
-    id: kpi.id,
+    id: Number(kpi.id),
     name: kpi.name,
     description: kpi.description,
     formula: kpi.formula,
@@ -80,6 +82,15 @@ function mapKpiToSupabase(kpi) {
     unit: kpi.unit,
     alexandra: kpi.alexandra,
     eva: kpi.eva
+  };
+}
+
+function mapNoteFromSupabase(note) {
+  return {
+    id: note.id,
+    employee: note.employee || "",
+    text: note.text || "",
+    createdAt: note.created_at
   };
 }
 
@@ -117,10 +128,13 @@ app.get("/kpis", async (_req, res) => {
     .order("id", { ascending: true });
 
   if (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      ok: false,
+      message: error.message
+    });
   }
 
-  res.json(data.map(mapKpiFromSupabase));
+  return res.json((data || []).map(mapKpiFromSupabase));
 });
 
 app.post("/kpis", async (req, res) => {
@@ -138,22 +152,27 @@ app.post("/kpis", async (req, res) => {
     });
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("kpis")
-    .insert(mapKpiToSupabase(newKpi));
+    .insert(mapKpiToSupabase(newKpi))
+    .select()
+    .single();
 
   if (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      ok: false,
+      message: error.message
+    });
   }
 
-  return res.status(201).json(newKpi);
+  return res.status(201).json(mapKpiFromSupabase(data));
 });
 
 app.get("/kpis/:id", async (req, res) => {
   const { data, error } = await supabase
     .from("kpis")
     .select("*")
-    .eq("id", req.params.id)
+    .eq("id", Number(req.params.id))
     .single();
 
   if (error || !data) {
@@ -169,7 +188,7 @@ app.get("/kpis/:id", async (req, res) => {
 app.put("/kpis/:id", async (req, res) => {
   const updatedKpi = sanitizeKpi({
     ...req.body,
-    id: req.params.id
+    id: Number(req.params.id)
   });
 
   if (
@@ -184,29 +203,37 @@ app.put("/kpis/:id", async (req, res) => {
     });
   }
 
-  const { error } = await supabase
+  const { data, error } = await supabase
     .from("kpis")
     .update(mapKpiToSupabase(updatedKpi))
-    .eq("id", req.params.id);
+    .eq("id", Number(req.params.id))
+    .select()
+    .single();
 
   if (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      ok: false,
+      message: error.message
+    });
   }
 
-  return res.json(updatedKpi);
+  return res.json(mapKpiFromSupabase(data));
 });
 
 app.delete("/kpis/:id", async (req, res) => {
   const { error } = await supabase
     .from("kpis")
     .delete()
-    .eq("id", req.params.id);
+    .eq("id", Number(req.params.id));
 
   if (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      ok: false,
+      message: error.message
+    });
   }
 
-  res.json({ ok: true });
+  return res.json({ ok: true });
 });
 
 app.get("/notes", async (_req, res) => {
@@ -216,17 +243,13 @@ app.get("/notes", async (_req, res) => {
     .order("created_at", { ascending: false });
 
   if (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      ok: false,
+      message: error.message
+    });
   }
 
-  res.json(
-    data.map((note) => ({
-      id: note.id,
-      employee: note.employee,
-      text: note.text,
-      createdAt: note.created_at
-    }))
-  );
+  return res.json((data || []).map(mapNoteFromSupabase));
 });
 
 app.post("/notes", async (req, res) => {
@@ -247,31 +270,36 @@ app.post("/notes", async (req, res) => {
     created_at: new Date().toISOString()
   };
 
-  const { error } = await supabase.from("notes").insert(newNote);
+  const { data, error } = await supabase
+    .from("notes")
+    .insert(newNote)
+    .select()
+    .single();
 
   if (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      ok: false,
+      message: error.message
+    });
   }
 
-  return res.status(201).json({
-    id: newNote.id,
-    employee,
-    text,
-    createdAt: newNote.created_at
-  });
+  return res.status(201).json(mapNoteFromSupabase(data));
 });
 
 app.delete("/notes/:id", async (req, res) => {
   const { error } = await supabase
     .from("notes")
     .delete()
-    .eq("id", req.params.id);
+    .eq("id", Number(req.params.id));
 
   if (error) {
-    return res.status(500).json({ message: error.message });
+    return res.status(500).json({
+      ok: false,
+      message: error.message
+    });
   }
 
-  res.json({ ok: true });
+  return res.json({ ok: true });
 });
 
 app.listen(PORT, () => {
