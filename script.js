@@ -92,11 +92,11 @@ function updateOwnerFieldState(ownerSelectId, alexandraInputId, evaInputId) {
   evaInput.disabled = owner === "alex";
 
   if (owner === "eva") {
-    alexandraInput.value = 0;
+    alexandraInput.value = "0";
   }
 
   if (owner === "alex") {
-    evaInput.value = 0;
+    evaInput.value = "0";
   }
 }
 
@@ -132,23 +132,38 @@ function formatValue(value, unit) {
 function getStatus(value, target) {
   const targetNumber = parseMetricNumber(target);
   const valueNumber = parseMetricNumber(value);
-  const ratio = targetNumber ? (valueNumber / targetNumber) * 100 : 0;
 
-  if (ratio >= 80 && ratio <= 100) {
+  if (
+    Number.isNaN(targetNumber) ||
+    Number.isNaN(valueNumber) ||
+    targetNumber <= 0
+  ) {
+    return {
+      label: "Sin datos",
+      className: "status-red",
+      color: "#d1495b",
+      progress: 0
+    };
+  }
+
+  const ratio = (valueNumber / targetNumber) * 100;
+  const progress = Math.min(Math.max(ratio, 0), 100);
+
+  if (ratio >= 80) {
     return {
       label: "En verde",
       className: "status-green",
       color: "#1e9b62",
-      progress: Math.min(ratio, 100)
+      progress
     };
   }
 
-  if (ratio >= 50 && ratio < 80) {
+  if (ratio >= 50) {
     return {
       label: "En naranja",
       className: "status-orange",
       color: "#ef8f16",
-      progress: Math.min(ratio, 100)
+      progress
     };
   }
 
@@ -156,7 +171,7 @@ function getStatus(value, target) {
     label: "En rojo",
     className: "status-red",
     color: "#d1495b",
-    progress: Math.min(ratio, 100)
+    progress
   };
 }
 
@@ -388,13 +403,13 @@ function renderChart(kpis) {
         },
         {
           label: "Alexandra",
-          data: kpis.map((kpi) => kpi.alexandra),
+          data: kpis.map((kpi) => parseMetricNumber(kpi.alexandra) || 0),
           backgroundColor: "#1f5eff",
           borderRadius: 12
         },
         {
           label: "Eva",
-          data: kpis.map((kpi) => kpi.eva),
+          data: kpis.map((kpi) => parseMetricNumber(kpi.eva) || 0),
           backgroundColor: "#ef8f16",
           borderRadius: 12
         }
@@ -581,7 +596,12 @@ function getAverageRatio(kpis, personKey) {
     return 0;
   }
 
-  const total = validKpis.reduce((acc, kpi) => acc + (parseMetricNumber(kpi[personKey]) / parseMetricNumber(kpi.target)) * 100, 0);
+  const total = validKpis.reduce((acc, kpi) => {
+    const target = parseMetricNumber(kpi.target);
+    const value = parseMetricNumber(kpi[personKey]);
+    return acc + (value / target) * 100;
+  }, 0);
+
   return Math.round(total / validKpis.length);
 }
 
@@ -626,6 +646,7 @@ function renderOwnerAverageTable(kpis, owner) {
 
   const alexAverage = getAverageRatio(kpis, "alexandra");
   const evaAverage = getAverageRatio(kpis, "eva");
+
   target.innerHTML = `
     <tr>
       <td>Alex</td>
@@ -675,13 +696,14 @@ async function initKpiOwnerPage() {
       minTarget: document.getElementById("ownerKpiMinTarget").value.trim(),
       target: document.getElementById("ownerKpiTarget").value.trim(),
       unit: document.getElementById("ownerKpiUnit").value.trim(),
-      alexandra: owner === "eva"
-      ? "0"
-      : document.getElementById("ownerKpiAlexandra")?.value.trim() || "0",
-
-      eva: owner === "alex"
-      ? "0"
-      : document.getElementById("ownerKpiEva")?.value.trim() || "0"
+      alexandra:
+        owner === "eva"
+          ? "0"
+          : document.getElementById("ownerKpiAlexandra")?.value.trim() || "0",
+      eva:
+        owner === "alex"
+          ? "0"
+          : document.getElementById("ownerKpiEva")?.value.trim() || "0"
     };
 
     await fetchJSON("/kpis", {
@@ -895,6 +917,7 @@ async function initEditarKpiPage() {
   document.getElementById("editKpiUnit").value = kpi.unit;
   document.getElementById("editKpiAlexandra").value = kpi.alexandra;
   document.getElementById("editKpiEva").value = kpi.eva;
+
   updateOwnerFieldState("editKpiOwner", "editKpiAlexandra", "editKpiEva");
   renderEditKpiSummary(kpi);
 
@@ -924,6 +947,7 @@ async function initEditarKpiPage() {
 
     try {
       const returnPath = getEditingReturnPath();
+
       await fetchJSON(`/kpis/${kpiId}`, {
         method: "DELETE"
       });
