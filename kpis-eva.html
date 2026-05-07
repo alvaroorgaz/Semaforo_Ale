@@ -53,39 +53,48 @@
         <div class="col-xl-8">
           <div id="ownerKpiCards" class="row g-4"></div>
         </div>
+
         <div class="col-xl-4">
           <div class="panel-card h-100">
             <h2 class="h4 mb-3">Anadir nuevo KPI para Eva</h2>
             <p class="section-subtitle">Este formulario crea directamente un KPI individual de Eva.</p>
+
             <form id="ownerKpiForm">
               <div class="mb-3">
                 <label for="ownerKpiName" class="form-label fw-semibold">Nombre del KPI</label>
                 <input id="ownerKpiName" class="form-control" required>
               </div>
+
               <div class="mb-3">
                 <label for="ownerKpiDescription" class="form-label fw-semibold">Descripcion corta</label>
                 <input id="ownerKpiDescription" class="form-control">
               </div>
+
               <div class="mb-3">
                 <label for="ownerKpiFormula" class="form-label fw-semibold">Formula</label>
                 <input id="ownerKpiFormula" class="form-control">
               </div>
+
               <div class="mb-3">
                 <label for="ownerKpiMinTarget" class="form-label fw-semibold">Objetivo minimo</label>
                 <input id="ownerKpiMinTarget" type="text" inputmode="text" class="form-control">
               </div>
+
               <div class="mb-3">
                 <label for="ownerKpiTarget" class="form-label fw-semibold">Objetivo</label>
-                <input id="ownerKpiTarget" type="text" inputmode="text" class="form-control">
+                <input id="ownerKpiTarget" type="text" inputmode="text" class="form-control" required>
               </div>
+
               <div class="mb-3">
                 <label for="ownerKpiUnit" class="form-label fw-semibold">Unidad</label>
                 <input id="ownerKpiUnit" class="form-control" required>
               </div>
+
               <div class="mb-3">
                 <label for="ownerKpiEva" class="form-label fw-semibold">Valor Eva</label>
-                <input id="ownerKpiEva" type="number" class="form-control" required>
+                <input id="ownerKpiEva" type="text" inputmode="text" class="form-control" required>
               </div>
+
               <button class="btn btn-primary-soft w-100" type="submit">Guardar KPI</button>
             </form>
           </div>
